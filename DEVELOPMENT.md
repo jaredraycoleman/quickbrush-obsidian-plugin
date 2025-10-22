@@ -59,10 +59,10 @@ This will:
 2. Create a symlink to your test vault:
    ```bash
    # Linux/Mac
-   ln -s /path/to/quickbrush/obsidian-plugin /path/to/your/vault/.obsidian/plugins/quickbrush
+   ln -s /path/to/quickbrush/quickbrush-obsidian-plugin /path/to/your/vault/.obsidian/plugins/quickbrush
 
    # Windows (Run as Administrator)
-   mklink /D "C:\path\to\vault\.obsidian\plugins\quickbrush" "C:\path\to\quickbrush\obsidian-plugin"
+   mklink /D "C:\path\to\vault\.obsidian\plugins\quickbrush" "C:\path\to\quickbrush\quickbrush-obsidian-plugin"
    ```
 
 3. Enable the plugin in Obsidian:
@@ -86,24 +86,6 @@ This will:
    ```
 
 3. Reload Obsidian or the plugin
-
-## Project Structure
-
-```
-obsidian-plugin/
-├── main.ts                 # Main plugin code
-├── manifest.json           # Plugin manifest
-├── package.json            # Node dependencies
-├── tsconfig.json           # TypeScript configuration
-├── esbuild.config.mjs      # Build configuration
-├── version-bump.mjs        # Version management script
-├── versions.json           # Version history
-├── styles.css              # Plugin styles
-├── .gitignore             # Git ignore rules
-├── .npmrc                 # npm configuration
-├── README.md              # User documentation
-└── DEVELOPMENT.md         # This file
-```
 
 ## Key Components
 
