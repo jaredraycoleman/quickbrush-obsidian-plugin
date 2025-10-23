@@ -8,7 +8,7 @@ interface QuickBrushSettings {
 
 const DEFAULT_SETTINGS: QuickBrushSettings = {
 	apiKey: '',
-	apiUrl: 'https://quickbrush.online/api',
+	apiUrl: 'https://quickbrush.ai/api',
 	quickbrushFolder: 'Quickbrush'
 };
 
@@ -121,7 +121,7 @@ export default class QuickBrushPlugin extends Plugin {
 
 	openGenerateModal(defaultType?: 'character' | 'scene' | 'creature' | 'item') {
 		if (!this.settings.apiKey) {
-			new Notice('API Key Required: Please set your QuickBrush API key in the plugin settings. Get your key from quickbrush.online.', 6000);
+			new Notice('API Key Required: Please set your QuickBrush API key in the plugin settings. Get your key from quickbrush.ai.', 6000);
 			return;
 		}
 
@@ -282,9 +282,9 @@ export default class QuickBrushPlugin extends Plugin {
 
 			// Handle specific status codes with helpful messages
 			if (response.status === 401) {
-				throw new Error(`Invalid API Key: ${apiErrorMessage}\n\nPlease check your QuickBrush settings and update your API key from quickbrush.online.`);
+				throw new Error(`Invalid API Key: ${apiErrorMessage}\n\nPlease check your QuickBrush settings and update your API key from quickbrush.ai.`);
 			} else if (response.status === 402) {
-				throw new Error(`Insufficient Brushstrokes: ${apiErrorMessage}\n\nVisit quickbrush.online to purchase more or upgrade your subscription.`);
+				throw new Error(`Insufficient Brushstrokes: ${apiErrorMessage}\n\nVisit quickbrush.ai to purchase more or upgrade your subscription.`);
 			} else if (response.status === 429) {
 				throw new Error(`Rate Limit Exceeded: ${apiErrorMessage}\n\nPlease wait before trying again. Limits: 1 per 10 seconds, 50 per hour.`);
 			} else if (response.status === 422) {
@@ -304,7 +304,7 @@ export default class QuickBrushPlugin extends Plugin {
 				}
 				throw new Error(`Validation Error: ${errorDetails}\n\nPlease check your inputs and try again.`);
 			} else {
-				throw new Error(`Generation Failed (${response.status}): ${apiErrorMessage}\n\nIf this persists, please contact support at quickbrush.online.`);
+				throw new Error(`Generation Failed (${response.status}): ${apiErrorMessage}\n\nIf this persists, please contact support at quickbrush.ai.`);
 			}
 		} catch (error) {
 			// If it's already a formatted error from above, re-throw it
@@ -526,7 +526,7 @@ views:
 
 	openSyncModal() {
 		if (!this.settings.apiKey) {
-			new Notice('API Key Required: Please set your QuickBrush API key in the plugin settings. Get your key from quickbrush.online.', 6000);
+			new Notice('API Key Required: Please set your QuickBrush API key in the plugin settings. Get your key from quickbrush.ai.', 6000);
 			return;
 		}
 		new SyncLibraryModal(this.app, this).open();
@@ -1108,7 +1108,7 @@ class QuickBrushSettingTab extends PluginSettingTab {
 		// API Key
 		new Setting(containerEl)
 			.setName('API Key')
-			.setDesc('Your QuickBrush API key from quickbrush.online')
+			.setDesc('Your QuickBrush API key from quickbrush.ai')
 			.addText(text => text
 				.setPlaceholder('Enter your API key')
 				.setValue(this.plugin.settings.apiKey)
@@ -1122,7 +1122,7 @@ class QuickBrushSettingTab extends PluginSettingTab {
 			.setName('API URL')
 			.setDesc('QuickBrush API endpoint (change only if using a custom server)')
 			.addText(text => text
-				.setPlaceholder('https://quickbrush.online/api')
+				.setPlaceholder('https://quickbrush.ai/api')
 				.setValue(this.plugin.settings.apiUrl)
 				.onChange(async (value) => {
 					this.plugin.settings.apiUrl = value;
@@ -1172,7 +1172,7 @@ class QuickBrushSettingTab extends PluginSettingTab {
 		containerEl.createEl('h3', { text: 'Help' });
 		const helpText = containerEl.createDiv();
 		helpText.innerHTML = `
-			<p>Get your API key from <a href="https://quickbrush.online">quickbrush.online</a></p>
+			<p>Get your API key from <a href="https://quickbrush.ai">quickbrush.ai</a></p>
 			<p>Use the ribbon icon or command palette to generate images.</p>
 			<p>Generated images are saved to the Images Folder and gallery notes are created in the Gallery Folder.</p>
 		`;

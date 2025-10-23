@@ -213,7 +213,7 @@ console.log('QuickBrush: Generating image with options:', options);
 - [Obsidian Plugin Developer Documentation](https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin)
 - [Obsidian API Reference](https://github.com/obsidianmd/obsidian-api)
 - [Sample Plugin](https://github.com/obsidianmd/obsidian-sample-plugin)
-- [QuickBrush API Documentation](https://quickbrush.online/api/docs)
+- [QuickBrush API Documentation](https://quickbrush.ai/api/docs)
 
 ## Publishing
 
