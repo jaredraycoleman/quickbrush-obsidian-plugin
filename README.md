@@ -36,7 +36,7 @@ Generate AI-powered images directly from your Obsidian notes using QuickBrush. C
 
 ## Setup
 
-1. Get your API key from [quickbrush.online](https://quickbrush.online)
+1. Get your API key from [quickbrush.ai](https://quickbrush.ai)
 2. Open Settings → QuickBrush
 3. Enter your API key
 4. (Optional) Customize the parent folder name (default: "Quickbrush")
@@ -117,7 +117,7 @@ Gallery notes are automatically named with timestamps (e.g., `2025-01-15 103045.
 ## Settings
 
 - **API Key**: Your QuickBrush API key
-- **API URL**: QuickBrush API endpoint (default: https://quickbrush.online/api)
+- **API URL**: QuickBrush API endpoint (default: https://quickbrush.ai/api)
 - **QuickBrush Folder**: Parent folder for all QuickBrush files (default: `Quickbrush`)
   - Images: `{folder}/quickbrush-images`
   - Gallery: `{folder}/quickbrush-gallery`
@@ -171,10 +171,10 @@ carries an ancient staff topped with a glowing crystal.
 
 **"Invalid API key"**
 - Check that your API key is correct
-- Get a new key from [quickbrush.online](https://quickbrush.online)
+- Get a new key from [quickbrush.ai](https://quickbrush.ai)
 
 **"Insufficient brushstrokes"**
-- Visit [quickbrush.online](https://quickbrush.online) to purchase more brushstrokes
+- Visit [quickbrush.ai](https://quickbrush.ai) to purchase more brushstrokes
 
 **"Rate limit exceeded"**
 - Wait a few seconds before generating another image
@@ -182,7 +182,7 @@ carries an ancient staff topped with a glowing crystal.
 
 ## Support
 
-- Website: [quickbrush.online](https://quickbrush.online)
+- Website: [quickbrush.ai](https://quickbrush.ai)
 - Report issues: [GitHub Issues](https://github.com/yourusername/quickbrush/issues)
 
 ## License

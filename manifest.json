@@ -5,6 +5,6 @@
 	"minAppVersion": "0.15.0",
 	"description": "Generates AI Images directly from notes with Quickbrush API.",
 	"author": "Quickbrush",
-	"authorUrl": "https://quickbrush.online",
+	"authorUrl": "https://quickbrush.ai",
 	"isDesktopOnly": false
 }
