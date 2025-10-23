@@ -98,6 +98,15 @@ export default class QuickBrushPlugin extends Plugin {
 			}
 		});
 
+		// Add sync command
+		this.addCommand({
+			id: 'sync-library',
+			name: 'Sync Library from QuickBrush',
+			callback: () => {
+				this.openSyncModal();
+			}
+		});
+
 		// Add settings tab
 		this.addSettingTab(new QuickBrushSettingTab(this.app, this));
 	}
@@ -513,6 +522,233 @@ views:
 		});
 
 		return response.json;
+	}
+
+	openSyncModal() {
+		if (!this.settings.apiKey) {
+			new Notice('API Key Required: Please set your QuickBrush API key in the plugin settings. Get your key from quickbrush.online.', 6000);
+			return;
+		}
+		new SyncLibraryModal(this.app, this).open();
+	}
+
+	async syncLibraryFromServer(overwrite: boolean): Promise<{ success: number; skipped: number; errors: number }> {
+		const imagesFolder = this.getImagesFolder();
+		const galleryFolder = this.getGalleryFolder();
+		await this.ensureFolderExists(imagesFolder);
+		await this.ensureFolderExists(galleryFolder);
+		await this.ensureGenerationsBaseExists();
+
+		try {
+			// Fetch all generations from API
+			new Notice('Fetching library from QuickBrush...');
+			
+			const url = `${this.settings.apiUrl}/generations?limit=100`;
+			const response = await requestUrl({
+				url,
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${this.settings.apiKey}`
+				}
+			});
+
+			const data = response.json;
+			const generations = data.generations || [];
+
+			if (generations.length === 0) {
+				new Notice('No images found in library');
+				return { success: 0, skipped: 0, errors: 0 };
+			}
+
+			new Notice(`Syncing ${generations.length} images...`);
+
+			let successCount = 0;
+			let skippedCount = 0;
+			let errorCount = 0;
+
+			for (let i = 0; i < generations.length; i++) {
+				const gen = generations[i];
+				
+				// Update progress every 5 images or on the last one
+				if (i % 5 === 0 || i === generations.length - 1) {
+					new Notice(`Syncing ${i + 1}/${generations.length} images...`, 2000);
+				}
+
+				try {
+					const sanitizedName = gen.image_name?.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') || `quickbrush-${gen.id}`;
+					const filename = `${sanitizedName}.webp`;
+					const filepath = `${imagesFolder}/${filename}`;
+
+					// Check if file exists
+					const existingFile = this.app.vault.getAbstractFileByPath(filepath);
+					
+					if (existingFile && !overwrite) {
+						skippedCount++;
+						continue;
+					}
+
+					// Download image
+					const imageUrl = gen.image_url.startsWith('/') 
+						? `${this.settings.apiUrl.replace(/\/api$/, '')}${gen.image_url}`
+						: gen.image_url;
+
+					const imageResponse = await requestUrl({
+						url: imageUrl,
+						method: 'GET',
+						headers: {
+							'Authorization': `Bearer ${this.settings.apiKey}`
+						}
+					});
+
+					const imageData = imageResponse.arrayBuffer;
+
+					// Save or overwrite the image
+					if (existingFile) {
+						await this.app.vault.modifyBinary(existingFile as TFile, imageData);
+					} else {
+						await this.app.vault.createBinary(filepath, imageData);
+					}
+
+					// Create gallery note
+					const createdDate = new Date(gen.created_at);
+					const timestamp = this.formatTimestamp(createdDate);
+					const noteFilename = gen.image_name 
+						? `${sanitizedName} - ${timestamp}.md`
+						: `${timestamp}.md`;
+					const notePath = `${galleryFolder}/${noteFilename}`;
+
+					// Check if gallery note exists
+					const existingNote = this.app.vault.getAbstractFileByPath(notePath);
+
+					if (!existingNote || overwrite) {
+						// Create frontmatter properties
+						const properties = {
+							date: gen.created_at,
+							generation_type: gen.generation_type,
+							quality: gen.quality,
+							aspect_ratio: gen.aspect_ratio,
+							brushstrokes_used: gen.brushstrokes_used,
+							image: `[[${filepath}]]`,
+						};
+
+						// Build note content
+						let content = '---\n';
+						for (const [key, value] of Object.entries(properties)) {
+							const escapedValue = typeof value === 'string' ? value.replace(/"/g, '\\"') : value;
+							content += `${key}: "${escapedValue}"\n`;
+						}
+						content += '---\n\n';
+						content += `![[${filepath}]]\n`;
+
+						// Add descriptions
+						content += `\n**Original Description:**\n\n${gen.user_text || 'No description'}\n`;
+						
+						if (gen.user_prompt) {
+							content += `\n**Context Prompt:**\n\n${gen.user_prompt}\n`;
+						}
+
+						// Create or overwrite the note
+						if (existingNote) {
+							await this.app.vault.modify(existingNote as TFile, content);
+						} else {
+							await this.app.vault.create(notePath, content);
+						}
+					}
+
+					successCount++;
+				} catch (err) {
+					console.error(`Failed to sync generation ${gen.id}:`, err);
+					errorCount++;
+				}
+			}
+
+			return { success: successCount, skipped: skippedCount, errors: errorCount };
+		} catch (error) {
+			console.error('Failed to sync library:', error);
+			throw error;
+		}
+	}
+}
+
+class SyncLibraryModal extends Modal {
+	plugin: QuickBrushPlugin;
+	overwriteCheckbox: HTMLInputElement;
+
+	constructor(app: App, plugin: QuickBrushPlugin) {
+		super(app);
+		this.plugin = plugin;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+
+		contentEl.createEl('h2', { text: 'Sync Library from QuickBrush' });
+
+		contentEl.createEl('p', { 
+			text: 'This will download all images from your QuickBrush library to your vault.' 
+		});
+
+		// Overwrite checkbox
+		const checkboxContainer = contentEl.createDiv({ cls: 'quickbrush-checkbox-container' });
+		checkboxContainer.style.marginBottom = '20px';
+		
+		this.overwriteCheckbox = checkboxContainer.createEl('input', { 
+			type: 'checkbox' 
+		});
+		this.overwriteCheckbox.id = 'overwrite-checkbox';
+		this.overwriteCheckbox.style.marginRight = '10px';
+
+		const label = checkboxContainer.createEl('label');
+		label.htmlFor = 'overwrite-checkbox';
+		label.textContent = 'Overwrite existing images';
+
+		const note = contentEl.createEl('p', {
+			cls: 'setting-item-description'
+		});
+		note.textContent = 'If unchecked, existing images will be skipped. If checked, all images will be re-downloaded and overwritten.';
+		note.style.fontSize = '0.9em';
+		note.style.color = 'var(--text-muted)';
+		note.style.marginBottom = '20px';
+
+		// Buttons
+		const buttonContainer = contentEl.createDiv({ cls: 'quickbrush-button-container' });
+		buttonContainer.style.display = 'flex';
+		buttonContainer.style.justifyContent = 'flex-end';
+		buttonContainer.style.gap = '10px';
+
+		const cancelButton = buttonContainer.createEl('button', { text: 'Cancel' });
+		cancelButton.addEventListener('click', () => {
+			this.close();
+		});
+
+		const syncButton = buttonContainer.createEl('button', {
+			text: 'Sync Library',
+			cls: 'mod-cta'
+		});
+		syncButton.addEventListener('click', () => {
+			this.handleSync();
+		});
+	}
+
+	async handleSync() {
+		const overwrite = this.overwriteCheckbox.checked;
+		
+		this.close();
+
+		try {
+			const result = await this.plugin.syncLibraryFromServer(overwrite);
+			
+			const message = `Sync complete! Downloaded: ${result.success}, Skipped: ${result.skipped}, Errors: ${result.errors}`;
+			new Notice(message, 6000);
+		} catch (error: any) {
+			new Notice(`Sync failed: ${error.message}`, 6000);
+		}
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
 	}
 }
 
