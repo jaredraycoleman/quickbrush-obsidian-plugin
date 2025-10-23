@@ -293,7 +293,7 @@ export default class QuickBrushPlugin extends Plugin {
 				try {
 					const errorData = response.json;
 					if (errorData.detail && Array.isArray(errorData.detail)) {
-						errorDetails = errorData.detail.map((e: any) => {
+						errorDetails = errorData.detail.map((e: { loc?: string[]; msg?: string; message?: string }) => {
 							const field = e.loc ? e.loc.join('.') : 'field';
 							const msg = e.msg || e.message || 'validation error';
 							return `${field}: ${msg}`;
@@ -603,8 +603,8 @@ views:
 					const imageData = imageResponse.arrayBuffer;
 
 					// Save or overwrite the image
-					if (existingFile) {
-						await this.app.vault.modifyBinary(existingFile as TFile, imageData);
+					if (existingFile && existingFile instanceof TFile) {
+						await this.app.vault.modifyBinary(existingFile, imageData);
 					} else {
 						await this.app.vault.createBinary(filepath, imageData);
 					}
@@ -648,8 +648,8 @@ views:
 						}
 
 						// Create or overwrite the note
-						if (existingNote) {
-							await this.app.vault.modify(existingNote as TFile, content);
+						if (existingNote && existingNote instanceof TFile) {
+							await this.app.vault.modify(existingNote, content);
 						} else {
 							await this.app.vault.create(notePath, content);
 						}
@@ -691,31 +691,23 @@ class SyncLibraryModal extends Modal {
 
 		// Overwrite checkbox
 		const checkboxContainer = contentEl.createDiv({ cls: 'quickbrush-checkbox-container' });
-		checkboxContainer.style.marginBottom = '20px';
-		
-		this.overwriteCheckbox = checkboxContainer.createEl('input', { 
-			type: 'checkbox' 
+
+		this.overwriteCheckbox = checkboxContainer.createEl('input', {
+			type: 'checkbox'
 		});
 		this.overwriteCheckbox.id = 'overwrite-checkbox';
-		this.overwriteCheckbox.style.marginRight = '10px';
 
 		const label = checkboxContainer.createEl('label');
 		label.htmlFor = 'overwrite-checkbox';
 		label.textContent = 'Overwrite existing images';
 
 		const note = contentEl.createEl('p', {
-			cls: 'setting-item-description'
+			cls: 'quickbrush-sync-note'
 		});
 		note.textContent = 'If unchecked, existing images will be skipped. If checked, all images will be re-downloaded and overwritten.';
-		note.style.fontSize = '0.9em';
-		note.style.color = 'var(--text-muted)';
-		note.style.marginBottom = '20px';
 
 		// Buttons
 		const buttonContainer = contentEl.createDiv({ cls: 'quickbrush-button-container' });
-		buttonContainer.style.display = 'flex';
-		buttonContainer.style.justifyContent = 'flex-end';
-		buttonContainer.style.gap = '10px';
 
 		const cancelButton = buttonContainer.createEl('button', { text: 'Cancel' });
 		cancelButton.addEventListener('click', () => {
@@ -741,8 +733,9 @@ class SyncLibraryModal extends Modal {
 			
 			const message = `Sync complete! Downloaded: ${result.success}, Skipped: ${result.skipped}, Errors: ${result.errors}`;
 			new Notice(message, 6000);
-		} catch (error: any) {
-			new Notice(`Sync failed: ${error.message}`, 6000);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Unknown error occurred';
+			new Notice(`Sync failed: ${message}`, 6000);
 		}
 	}
 
@@ -855,10 +848,6 @@ class GenerateModal extends Modal {
 				}));
 
 		const refImagesContainer = contentEl.createDiv({ cls: 'quickbrush-ref-images' });
-		refImagesContainer.style.display = 'flex';
-		refImagesContainer.style.flexWrap = 'wrap';
-		refImagesContainer.style.gap = '10px';
-		refImagesContainer.style.marginBottom = '20px';
 
 		const updateRefImagesDisplay = () => {
 			refImagesContainer.empty();
@@ -871,32 +860,13 @@ class GenerateModal extends Modal {
 			}
 
 			this.referenceImages.forEach((imgData, index) => {
-				const imgWrapper = refImagesContainer.createDiv({ cls: 'ref-image-wrapper' });
-				imgWrapper.style.position = 'relative';
-				imgWrapper.style.width = '80px';
-				imgWrapper.style.height = '80px';
+				const imgWrapper = refImagesContainer.createDiv({ cls: 'quickbrush-ref-image-wrapper' });
 
 				const img = imgWrapper.createEl('img');
 				img.src = imgData;
-				img.style.width = '100%';
-				img.style.height = '100%';
-				img.style.objectFit = 'cover';
-				img.style.borderRadius = '4px';
 
-				const removeBtn = imgWrapper.createEl('button', { cls: 'ref-image-remove' });
+				const removeBtn = imgWrapper.createEl('button', { cls: 'quickbrush-ref-image-remove' });
 				removeBtn.textContent = '×';
-				removeBtn.style.position = 'absolute';
-				removeBtn.style.top = '2px';
-				removeBtn.style.right = '2px';
-				removeBtn.style.width = '20px';
-				removeBtn.style.height = '20px';
-				removeBtn.style.borderRadius = '50%';
-				removeBtn.style.background = 'var(--background-modifier-error)';
-				removeBtn.style.color = 'white';
-				removeBtn.style.border = 'none';
-				removeBtn.style.cursor = 'pointer';
-				removeBtn.style.fontSize = '14px';
-				removeBtn.style.lineHeight = '1';
 
 				removeBtn.addEventListener('click', () => {
 					this.referenceImages.splice(index, 1);
@@ -905,14 +875,10 @@ class GenerateModal extends Modal {
 			});
 
 			if (this.referenceImages.length === 0) {
-				const note = refImagesContainer.createDiv();
-				note.style.fontSize = '0.9em';
-				note.style.color = 'var(--text-muted)';
+				const note = refImagesContainer.createDiv({ cls: 'quickbrush-ref-image-note' });
 				note.textContent = 'No reference images selected';
 			} else if (this.initialImages.length > 0 && this.referenceImages.length === this.initialImages.length) {
-				const note = refImagesContainer.createDiv();
-				note.style.fontSize = '0.9em';
-				note.style.color = 'var(--text-muted)';
+				const note = refImagesContainer.createDiv({ cls: 'quickbrush-ref-image-note' });
 				note.textContent = `${this.initialImages.length} image(s) auto-selected from note`;
 			}
 		};
@@ -946,10 +912,6 @@ class GenerateModal extends Modal {
 
 		// Buttons
 		const buttonContainer = contentEl.createDiv({ cls: 'quickbrush-button-container' });
-		buttonContainer.style.display = 'flex';
-		buttonContainer.style.justifyContent = 'flex-end';
-		buttonContainer.style.gap = '10px';
-		buttonContainer.style.marginTop = '20px';
 
 		const cancelButton = buttonContainer.createEl('button', { text: 'Cancel' });
 		cancelButton.addEventListener('click', () => {
@@ -1032,9 +994,9 @@ class GenerateModal extends Modal {
 			text: text.substring(0, 10000),
 			image_name: imageName,
 			prompt: this.promptInput.getValue().substring(0, 1000) || undefined,
-			generation_type: this.typeDropdown.getValue() as any,
-			quality: this.qualityDropdown.getValue() as any,
-			aspect_ratio: this.aspectRatioDropdown.getValue() as any,
+			generation_type: this.typeDropdown.getValue() as 'character' | 'scene' | 'creature' | 'item',
+			quality: this.qualityDropdown.getValue() as 'low' | 'medium' | 'high',
+			aspect_ratio: this.aspectRatioDropdown.getValue() as 'square' | 'landscape' | 'portrait',
 			reference_image_paths: this.referenceImages.length > 0 ? this.referenceImages : undefined
 		};
 
@@ -1142,16 +1104,19 @@ class QuickBrushSettingTab extends PluginSettingTab {
 				}));
 
 		// Info about derived folders
-		const folderInfo = containerEl.createDiv();
-		folderInfo.style.fontSize = '0.9em';
-		folderInfo.style.color = 'var(--text-muted)';
-		folderInfo.style.marginTop = '-10px';
-		folderInfo.style.marginBottom = '20px';
-		folderInfo.innerHTML = `
-			<p>Images will be saved to: <code>${this.plugin.getImagesFolder()}</code></p>
-			<p>Gallery notes will be saved to: <code>${this.plugin.getGalleryFolder()}</code></p>
-			<p>Gallery index will be created at: <code>${this.plugin.getGenerationsBasePath()}</code></p>
-		`;
+		const folderInfo = containerEl.createDiv({ cls: 'quickbrush-folder-info' });
+
+		const imagesFolderP = folderInfo.createEl('p');
+		imagesFolderP.appendText('Images will be saved to: ');
+		imagesFolderP.createEl('code', { text: this.plugin.getImagesFolder() });
+
+		const galleryFolderP = folderInfo.createEl('p');
+		galleryFolderP.appendText('Gallery notes will be saved to: ');
+		galleryFolderP.createEl('code', { text: this.plugin.getGalleryFolder() });
+
+		const indexFolderP = folderInfo.createEl('p');
+		indexFolderP.appendText('Gallery index will be created at: ');
+		indexFolderP.createEl('code', { text: this.plugin.getGenerationsBasePath() });
 
 		// Account Info Section
 		containerEl.createEl('h3', { text: 'Account Information' });
@@ -1170,12 +1135,14 @@ class QuickBrushSettingTab extends PluginSettingTab {
 
 		// Help Section
 		containerEl.createEl('h3', { text: 'Help' });
-		const helpText = containerEl.createDiv();
-		helpText.innerHTML = `
-			<p>Get your API key from <a href="https://quickbrush.ai">quickbrush.ai</a></p>
-			<p>Use the ribbon icon or command palette to generate images.</p>
-			<p>Generated images are saved to the Images Folder and gallery notes are created in the Gallery Folder.</p>
-		`;
+		const helpText = containerEl.createDiv({ cls: 'quickbrush-help-text' });
+
+		const helpP1 = helpText.createEl('p');
+		helpP1.appendText('Get your API key from ');
+		helpP1.createEl('a', { text: 'quickbrush.ai', href: 'https://quickbrush.ai' });
+
+		helpText.createEl('p', { text: 'Use the ribbon icon or command palette to generate images.' });
+		helpText.createEl('p', { text: 'Generated images are saved to the Images Folder and gallery notes are created in the Gallery Folder.' });
 	}
 
 	async loadAccountInfo(container: HTMLElement, setting: Setting) {
