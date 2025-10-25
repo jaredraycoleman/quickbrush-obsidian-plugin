@@ -369,12 +369,15 @@ export default class QuickBrushPlugin extends Plugin {
 		const imagesFolder = this.getImagesFolder();
 		await this.ensureFolderExists(imagesFolder);
 
+		// Generate a short UID suffix (first 8 chars of generation ID)
+		const uidSuffix = generationId.substring(0, 8);
+
 		// Use image name if available, otherwise use generation ID
 		let filename: string;
 		if (imageName) {
 			// Sanitize the image name for use as filename
 			const sanitized = imageName.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
-			filename = `${sanitized}.webp`;
+			filename = `${sanitized}-${uidSuffix}.webp`;
 		} else {
 			filename = `quickbrush-${generationId}.webp`;
 		}
@@ -575,13 +578,16 @@ views:
 				}
 
 				try {
-					const sanitizedName = gen.image_name?.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') || `quickbrush-${gen.id}`;
-					const filename = `${sanitizedName}.webp`;
+					// Generate a short UID suffix (first 8 chars of generation ID)
+					const uidSuffix = gen.id.substring(0, 8);
+
+					const sanitizedName = gen.image_name?.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
+					const filename = sanitizedName ? `${sanitizedName}-${uidSuffix}.webp` : `quickbrush-${gen.id}.webp`;
 					const filepath = `${imagesFolder}/${filename}`;
 
 					// Check if file exists
 					const existingFile = this.app.vault.getAbstractFileByPath(filepath);
-					
+
 					if (existingFile && !overwrite) {
 						skippedCount++;
 						continue;
