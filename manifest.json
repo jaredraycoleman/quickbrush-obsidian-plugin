@@ -1,10 +1,10 @@
 {
-	"id": "quickbrush",
-	"name": "Quickbrush",
-	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "Generates AI Images directly from notes with Quickbrush API.",
-	"author": "Quickbrush",
-	"authorUrl": "https://quickbrush.ai",
-	"isDesktopOnly": false
+  "id": "quickbrush",
+  "name": "Quickbrush",
+  "version": "1.0.3",
+  "minAppVersion": "0.15.0",
+  "description": "Generates AI Images directly from notes with Quickbrush API.",
+  "author": "Quickbrush",
+  "authorUrl": "https://quickbrush.ai",
+  "isDesktopOnly": false
 }
