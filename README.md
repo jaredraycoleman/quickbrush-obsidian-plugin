@@ -1,23 +1,22 @@
 # QuickBrush for Obsidian
 
-Generate AI-powered images directly from your Obsidian notes using QuickBrush. Create character portraits, scenes, creatures, and items with just a few clicks.
+Generate AI-powered images directly from your Obsidian notes using your own OpenAI API key. Create character portraits, scenes, creatures, and items with just a few clicks.
 
 ## Features
 
+- **Bring Your Own Key (BYOK)**: Uses your own OpenAI API key - you only pay for what you use
 - **Four Generation Types**: Character, Scene, Creature, and Item images
 - **Smart Text Extraction**: Automatically extracts content from your active note
-- **Quality Options**: Choose from Low (1 brushstroke), Medium (3 brushstrokes), or High (5 brushstrokes)
+- **Reference Images**: Support for up to 3 reference images automatically extracted from your notes
+- **Quality Options**: Choose from Low, Medium, or High quality
 - **Multiple Aspect Ratios**: Square, Landscape, or Portrait
 - **Organized Storage**: All files organized in a single parent folder:
   - Images saved to `Quickbrush/quickbrush-images`
   - Gallery notes in `Quickbrush/quickbrush-gallery`
-  - Gallery index at `Quickbrush/quickbrush-generations.base` (Dataview query)
 - **Gallery Notes**: Each generation creates a timestamped note with:
   - Embedded image
   - Generation metadata (type, quality, aspect ratio, etc.)
   - Original and refined descriptions
-  - Automatic chronological ordering
-- **Dataview Integration**: Auto-generated `.base` file for viewing all generations in a table
 
 ## Installation
 
@@ -36,13 +35,13 @@ Generate AI-powered images directly from your Obsidian notes using QuickBrush. C
 
 ## Setup
 
-1. Get your API key from [quickbrush.ai](https://quickbrush.ai)
+1. Get your OpenAI API key from [platform.openai.com](https://platform.openai.com)
 2. Open Settings → QuickBrush
-3. Enter your API key
-4. (Optional) Customize the parent folder name (default: "Quickbrush")
+3. Enter your OpenAI API key
+4. (Optional) Choose your preferred image model (gpt-image-1-mini is recommended)
+5. (Optional) Customize the parent folder name (default: "Quickbrush")
    - Images will be saved to: `{folder}/quickbrush-images`
    - Gallery notes will be saved to: `{folder}/quickbrush-gallery`
-   - Gallery index will be created at: `{folder}/quickbrush-generations.base`
 
 ## Usage
 
@@ -60,16 +59,14 @@ Generate AI-powered images directly from your Obsidian notes using QuickBrush. C
 
 3. The plugin will automatically extract text from your note (excluding frontmatter)
 4. The first 3 images embedded in your note will be automatically selected as reference images
-5. You can add or remove reference images using the "Add Image" button
-6. Adjust the description, type, quality, and aspect ratio as needed
-7. Click "Generate"
+5. Adjust the description, type, quality, and aspect ratio as needed
+6. Click "Generate"
 
 ### Reference Images
 
 The plugin supports up to 3 reference images to guide the generation:
 
 - **Auto-Selected**: The first 3 images from your active note are automatically extracted
-- **Manual Selection**: Click "Add Image" to select additional images from your device
 - **Remove Images**: Click the × button on any thumbnail to remove it
 - **Supported Formats**: PNG, JPG, JPEG, GIF, WebP, BMP
 
@@ -84,9 +81,9 @@ Reference images help maintain consistency with existing artwork or provide visu
 - **Item**: For equipment, artifacts, and items (default: square)
 
 **Quality Levels:**
-- **Low**: 1 brushstroke, faster generation
-- **Medium**: 3 brushstrokes, balanced quality
-- **High**: 5 brushstrokes, best quality
+- **Low**: Faster generation, lower cost
+- **Medium**: Balanced quality and cost (recommended)
+- **High**: Best quality, higher cost
 
 **Aspect Ratios:**
 - **Square**: 1024x1024 (general purpose)
@@ -99,47 +96,53 @@ Each generated image creates a gallery note with this structure:
 
 ```markdown
 ---
-date: "2025-01-15T10:30:00.000Z"
-generation_type: "character"
-quality: "medium"
-aspect_ratio: "square"
-brushstrokes_used: 3
-original_description: "Your original description..."
-refined_description: "AI-enhanced description..."
-prompt: "Optional context prompt"
+generation_type: character
+quality: high
+aspect_ratio: square
+created: 2025-01-15T10:30:00.000Z
 ---
 
-![[quickbrush-images/quickbrush-abc123.webp]]
+# Character Name
+
+![[quickbrush-images/Character-Name-12345678.png]]
+
+## Generation Details
+
+**Type:** character
+**Quality:** high
+**Aspect Ratio:** square
+
+## Original Description
+
+Your original description...
+
+## Refined Description
+
+AI-enhanced description...
+
+## Prompt
+
+Optional context prompt
 ```
 
-Gallery notes are automatically named with timestamps (e.g., `2025-01-15 103045.md`) for chronological ordering.
+Gallery notes are automatically named with timestamps for chronological ordering.
 
 ## Settings
 
-- **API Key**: Your QuickBrush API key
-- **API URL**: QuickBrush API endpoint (default: https://quickbrush.ai/api)
+- **OpenAI API Key**: Your OpenAI API key from platform.openai.com
+- **Image Model**: Choose between gpt-image-1-mini (recommended) or gpt-image-1 (higher quality)
 - **QuickBrush Folder**: Parent folder for all QuickBrush files (default: `Quickbrush`)
   - Images: `{folder}/quickbrush-images`
   - Gallery: `{folder}/quickbrush-gallery`
-  - Index: `{folder}/quickbrush-generations.base`
 
-## Gallery Index
+## Pricing
 
-The plugin automatically creates a `quickbrush-generations.base` file in your QuickBrush folder. This file contains a Dataview query that displays all your generations in a sortable table:
+QuickBrush uses your OpenAI API key, so you only pay for what you use:
 
-```dataview
-TABLE WITHOUT ID
-	file.link as "Generation",
-	date as "Date",
-	generation_type as "Type",
-	quality as "Quality",
-	aspect_ratio as "Aspect Ratio",
-	brushstrokes_used as "Brushstrokes"
-FROM "Quickbrush/quickbrush-gallery"
-SORT date DESC
-```
+- **gpt-image-1-mini**: ~$0.01-0.05 per image (recommended)
+- **gpt-image-1**: ~$0.03-0.15 per image (higher quality)
 
-To view this table, you need to have the [Dataview plugin](https://github.com/blacksmithgu/obsidian-dataview) installed. The file is automatically updated when you change the QuickBrush folder setting.
+Actual costs depend on quality settings and whether you use reference images. Check [OpenAI's pricing page](https://openai.com/pricing) for current rates.
 
 ## Example Workflow
 
@@ -160,29 +163,28 @@ carries an ancient staff topped with a glowing crystal.
 
 2. Run "QuickBrush: Generate Character Image"
 3. The plugin extracts the description automatically
-4. Optionally add a context prompt like "the character is smiling and has a painted face"
+4. Optionally add a context prompt like "smiling, wearing a blue dress"
 5. Click Generate
 6. Image appears in `quickbrush-images/` and a gallery note is created in `quickbrush-gallery/`
 
 ## Troubleshooting
 
-**"Please set your QuickBrush API key in settings"**
-- You need to configure your API key in Settings → QuickBrush
+**"OpenAI API Key Required"**
+- You need to configure your OpenAI API key in Settings → QuickBrush
+- Get a key from [platform.openai.com](https://platform.openai.com)
 
-**"Invalid API key"**
-- Check that your API key is correct
-- Get a new key from [quickbrush.ai](https://quickbrush.ai)
+**"Generation failed: [error message]"**
+- Check that your API key is valid and has credits
+- Ensure your OpenAI account is in good standing
+- Check the console (Ctrl+Shift+I) for detailed error messages
 
-**"Insufficient brushstrokes"**
-- Visit [quickbrush.ai](https://quickbrush.ai) to purchase more brushstrokes
-
-**"Rate limit exceeded"**
-- Wait a few seconds before generating another image
-- Current limits: 1 per 10 seconds, 50 per hour
+**Images not appearing in notes**
+- Make sure the image path is correct
+- Try using the absolute path or `![[filename.png]]` format
 
 ## Support
 
-- Website: [quickbrush.ai](https://quickbrush.ai)
+- GitHub: [quickbrush](https://github.com/yourusername/quickbrush)
 - Report issues: [GitHub Issues](https://github.com/yourusername/quickbrush/issues)
 
 ## License
