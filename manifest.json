@@ -3,8 +3,8 @@
   "name": "Quickbrush",
   "version": "1.2.0",
   "minAppVersion": "0.15.0",
-  "description": "Generates AI Images directly from notes with Quickbrush API.",
-  "author": "Quickbrush",
-  "authorUrl": "https://quickbrush.ai",
+  "description": "Generate AI images from notes using your OpenAI key. A Wizzlethorpe Labs tool.",
+  "author": "Wizzlethorpe Labs",
+  "authorUrl": "https://wizzlethorpe.com",
   "isDesktopOnly": false
 }

@@ -1,6 +1,8 @@
-# QuickBrush for Obsidian
+# Quickbrush for Obsidian
 
-Generate AI-powered images directly from your Obsidian notes using your own OpenAI API key. Create character portraits, scenes, creatures, and items with just a few clicks.
+Generate AI-powered images from your Obsidian notes using your OpenAI API key (BYOK). Create character portraits, scenes, creatures, and items with a few clicks.
+
+**A tool by Wizzlethorpe Labs.**
 
 ## Features
 
@@ -184,8 +186,8 @@ carries an ancient staff topped with a glowing crystal.
 
 ## Support
 
-- GitHub: [quickbrush](https://github.com/yourusername/quickbrush)
-- Report issues: [GitHub Issues](https://github.com/yourusername/quickbrush/issues)
+- GitHub: [wizzlethorpe/quickbrush](https://github.com/wizzlethorpe/quickbrush)
+- Report issues: [GitHub Issues](https://github.com/wizzlethorpe/quickbrush/issues)
 
 ## License
 
