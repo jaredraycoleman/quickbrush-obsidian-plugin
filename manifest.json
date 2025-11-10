@@ -1,7 +1,7 @@
 {
   "id": "quickbrush",
   "name": "Quickbrush",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "minAppVersion": "0.15.0",
   "description": "Generate AI images from notes using your OpenAI key. A Wizzlethorpe Labs tool.",
   "author": "Wizzlethorpe Labs",
