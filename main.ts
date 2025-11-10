@@ -107,7 +107,7 @@ export default class QuickBrushPlugin extends Plugin {
 				// Extract content without frontmatter
 				initialText = this.extractContentWithoutFrontmatter(content);
 
-				// Extract first 3 images from the note
+				// Extract first 4 images from the note
 				const imagePaths = this.extractImagePaths(content);
 
 				// Convert images to base64
@@ -155,14 +155,14 @@ export default class QuickBrushPlugin extends Plugin {
 		// Extract wiki-link image embeds: ![[image.png]]
 		const wikiImageRegex = /!\[\[([^\]]+\.(png|jpg|jpeg|gif|webp|bmp))\]\]/gi;
 		let match;
-		while ((match = wikiImageRegex.exec(content)) !== null && images.length < 3) {
+		while ((match = wikiImageRegex.exec(content)) !== null && images.length < 4) {
 			images.push(match[1]);
 		}
 
 		// If we need more, extract markdown image embeds: ![alt](image.png)
-		if (images.length < 3) {
+		if (images.length < 4) {
 			const mdImageRegex = /!\[[^\]]*\]\(([^\)]+\.(png|jpg|jpeg|gif|webp|bmp))\)/gi;
-			while ((match = mdImageRegex.exec(content)) !== null && images.length < 3) {
+			while ((match = mdImageRegex.exec(content)) !== null && images.length < 4) {
 				images.push(match[1]);
 			}
 		}
@@ -425,7 +425,7 @@ class GenerateModal extends Modal {
 		// Reference Images
 		const refImagesSetting = new Setting(contentEl)
 			.setName('Reference Images')
-			.setDesc(`${this.referenceImages.length}/3 images selected`);
+			.setDesc(`${this.referenceImages.length}/4 images selected`);
 
 		const refImagesContainer = contentEl.createDiv({ cls: 'quickbrush-ref-images' });
 		this.renderReferenceImages(refImagesContainer);
@@ -492,7 +492,7 @@ class GenerateModal extends Modal {
 				});
 			});
 
-			if (this.referenceImages.length < 3) {
+			if (this.referenceImages.length < 4) {
 				const note = container.createDiv({ cls: 'quickbrush-ref-image-note' });
 				note.textContent = 'Images from the active note are automatically included.';
 				note.style.fontSize = '0.9em';
